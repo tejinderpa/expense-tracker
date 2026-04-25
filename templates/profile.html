@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Spendly — Profile{% endblock %}
+
+{% block content %}
+
+<section class="profile-section">
+    <div class="profile-inner">
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <span>{{ user.username[0].upper() }}</span>
+            </div>
+            <div class="profile-info">
+                <h1 class="profile-name">{{ user.username }}</h1>
+                <p class="profile-email">{{ user.email }}</p>
+                <p class="profile-member">Member since {{ user.created_at[:10] }}</p>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Total Spent</span>
+                <span class="stat-value">₹{{ "%.2f"|format(stats.total_spent) }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">This Month</span>
+                <span class="stat-value">₹{{ "%.2f"|format(stats.this_month_spent) }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Transactions</span>
+                <span class="stat-value">{{ stats.expense_count }}</span>
+            </div>
+        </div>
+
+        <!-- Recent Expenses -->
+        <div class="recent-expenses">
+            <h2 class="expenses-title">Recent Expenses</h2>
+
+            {% if expenses %}
+            <div class="expenses-table">
+                <div class="table-header">
+                    <span class="th-date">Date</span>
+                    <span class="th-category">Category</span>
+                    <span class="th-description">Description</span>
+                    <span class="th-amount">Amount</span>
+                </div>
+
+                {% for expense in expenses %}
+                <div class="table-row">
+                    <span class="td-date">{{ expense.date }}</span>
+                    <span class="td-category">{{ expense.category }}</span>
+                    <span class="td-description">{{ expense.description or '-' }}</span>
+                    <span class="td-amount">₹{{ "%.2f"|format(expense.amount) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="no-expenses">No expenses yet. Start tracking your spending!</p>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

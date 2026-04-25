@@ -58,6 +58,77 @@ def init_db():
     conn.close()
 
 
+def get_user_by_id(user_id):
+    """
+    Fetch user by ID.
+    Returns a dict-like row or None if not found.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT id, username, email, created_at FROM users WHERE id = ?",
+        (user_id,)
+    )
+    row = cursor.fetchone()
+    conn.close()
+    return row
+
+
+def get_user_expense_stats(user_id):
+    """
+    Get expense statistics for a user.
+    Returns dict with total_spent, expense_count, this_month_spent.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Total spent and count
+    cursor.execute("""
+        SELECT COALESCE(SUM(amount), 0) AS total_spent,
+               COUNT(*) AS expense_count
+        FROM expenses
+        WHERE user_id = ?
+    """, (user_id,))
+    row = cursor.fetchone()
+    total_spent = row['total_spent']
+    expense_count = row['expense_count']
+
+    # This month's spending
+    cursor.execute("""
+        SELECT COALESCE(SUM(amount), 0) AS this_month
+        FROM expenses
+        WHERE user_id = ?
+          AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now')
+    """, (user_id,))
+    this_month = cursor.fetchone()['this_month']
+
+    conn.close()
+    return {
+        'total_spent': total_spent,
+        'expense_count': expense_count,
+        'this_month_spent': this_month
+    }
+
+
+def get_recent_expenses(user_id, limit=10):
+    """
+    Get most recent expenses for a user.
+    Returns list of expense rows ordered by date descending.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, amount, category, date, description
+        FROM expenses
+        WHERE user_id = ?
+        ORDER BY date DESC
+        LIMIT ?
+    """, (user_id, limit))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+
 def seed_db():
     """
     Inserts sample data for development.

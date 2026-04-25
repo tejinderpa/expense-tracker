@@ -1,5 +1,6 @@
-from flask import Flask, render_template, session, redirect, url_for, flash
+from flask import Flask, render_template, session, redirect, url_for, flash, request
 from database.db import init_db, seed_db, get_user_by_id, get_user_expense_stats, get_recent_expenses
+import sqlite3
 
 app = Flask(__name__)
 app.secret_key = 'dev-secret-key-change-in-production'
